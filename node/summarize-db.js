@@ -10,6 +10,7 @@ var connection = mysql.createConnection(credentials);
 var users = [];
 var databaseNames = [];
 var tableNames = [];
+var tmpMap = new Map();
 async.series([
 	function(callback) {
 		connection.connect(function(err){
@@ -26,7 +27,6 @@ async.series([
 			} else {
 				for(var i in rows) {
 					databaseNames[i] = rows[i].Database;
-				 	console.log(databaseNames[i]);
 				}
 				callback();
 			}
@@ -34,16 +34,23 @@ async.series([
 		
 	},
 	function(callback) {
-		for(var i in databaseNames) {
-			console.log(databaseNames[i]);
-			var tempStr = 'SHOW TABLES FROM '+databaseNames[i];
-			connection.query(tempStr, function(err, tables, fields) {
+		var db;
+		for(var j = 0; j < databaseNames.length; j++) {
+			db = databaseNames[j];
+			var tempStr = 'SHOW TABLES FROM '+ db;
+			connection.query(tempStr, (function(db){return function(err, tables, fields) {
 				if(err) {
 					console.log('Error looking up tables');
 				} else {
-					console.log(tables);
+					for(var k in tables) {
+						var tempStr2 = "Tables_in_"+ db;
+						tableNames[k] = tables[k][tempStr2];
+						console.log(tableNames[k]);
+					}
 				}
-			});
+			}})(db));
+			console.log(db);
+		
 		}
 		callback();
 	},
