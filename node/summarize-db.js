@@ -9,6 +9,7 @@ var connection = mysql.createConnection(credentials);
 
 var users = [];
 var databaseNames = [];
+var tableNames = [];
 async.series([
 	function(callback) {
 		connection.connect(function(err){
@@ -22,15 +23,29 @@ async.series([
 		connection.query('SHOW DATABASES', function(err, rows, fields){
 			if(err){
 				console.log('Error looking up databases');
-			} else{
+			} else {
 				for(var i in rows) {
 					databaseNames[i] = rows[i].Database;
-				 	console.log(databaseNames[i]);	
+				 	console.log(databaseNames[i]);
 				}
+				callback();
 			}
 		});
-		callback();
 		
+	},
+	function(callback) {
+		for(var i in databaseNames) {
+			console.log(databaseNames[i]);
+			var tempStr = 'SHOW TABLES FROM '+databaseNames[i];
+			connection.query(tempStr, function(err, tables, fields) {
+				if(err) {
+					console.log('Error looking up tables');
+				} else {
+					console.log(tables);
+				}
+			});
+		}
+		callback();
 	},
 	function(callback) {
 		connection.end()
