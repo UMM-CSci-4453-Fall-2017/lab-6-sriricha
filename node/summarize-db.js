@@ -22,12 +22,25 @@ connection.query('SHOW DATABASES',function(err,rows,fields){
 		  getTables(rows[j].Database);
 		  console.log(rows[j].Database);
 		}
-		connection.end();
+		
 }
+
+
 });
+
 
 function getDescription(dB, tableName){
   console.log(tableName);
+  connection.query('DESCRIBE ' + dB + '.' + tableName, function(err, rows, fields){
+    if(err){
+      console.log('errors');
+    } else{
+      console.log(rows[0].Field + ' ' + rows[0].Type);
+    }
+    
+    connection.end();
+  });
+  
 }
 
 function getTables(name){
@@ -35,16 +48,17 @@ function getTables(name){
   if(err){
     console.log('error tables');
   } else{
-    //console.log(tables);
     for(var k in tables) {
 				var tmpStr2 = "Tables_in_"+ name;
 				getDescription(name, tables[k][tmpStr2]);
 			}
+			
   }
   
+  
 });
-
 }
+
   
 
 console.log("All done now.");
