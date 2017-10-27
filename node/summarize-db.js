@@ -1,7 +1,7 @@
 var credentials = require('./credentials.json');
 
 var mysql=require("mysql");
-
+var count = 0;
 credentials.host="ids";
 var connection = mysql.createConnection(credentials);
 
@@ -18,41 +18,41 @@ connection.query('SHOW DATABASES',function(err,rows,fields){
     console.log('Error looking up databases');
   } else {
     
-    for(j = 0; j < rows.length; j++) {
-		  getTables(rows[j].Database);
-		  console.log(rows[j].Database);
+    for(var j in rows) {
+		  getTables(rows[j].Database, j, rows.length);
 		}
 		
 }
-
-
 });
 
 
-function getDescription(dB, tableName){
-  console.log(tableName);
+function getDescription(dB, tableName, index, length, indexTable, lengthTable){
   connection.query('DESCRIBE ' + dB + '.' + tableName, function(err, rows, fields){
     if(err){
       console.log('errors');
-    } else{
-      console.log(rows[0].Field + ' ' + rows[0].Type);
+    } 
+    else{
+      console.log('this is index' + index + " " + indexTable);
+      if(index == (length - 2) && indexTable == (lengthTable - 1)) {
+        connection.end();
+	return;
+      }
     }
     
-    connection.end();
   });
   
 }
 
-function getTables(name){
-	connection.query('SHOW TABLES FROM ' + name, function(err, tables, fields){
+function getTables(name, index, length){
+  connection.query('SHOW TABLES FROM ' + name, function(err, tables, fields){
   if(err){
     console.log('error tables');
-  } else{
+  } 
+    else{
     for(var k in tables) {
 				var tmpStr2 = "Tables_in_"+ name;
-				getDescription(name, tables[k][tmpStr2]);
+				getDescription(name, tables[k][tmpStr2], index, length, k, tables.length);
 			}
-			
   }
   
   
